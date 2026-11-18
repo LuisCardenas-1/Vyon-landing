@@ -15,9 +15,9 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { nombre, email, empresa, mensaje } = req.body;
+    const { nombre, telefono, email } = req.body;
 
-    if (!nombre || !email || !mensaje) {
+    if (!nombre || !telefono || !email) {
       return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
 
@@ -27,9 +27,8 @@ module.exports = async (req, res) => {
 
     const payload = {
       nombre,
+      telefono,
       email,
-      empresa: empresa || '',
-      mensaje,
       created_at: new Date().toISOString()
     };
 
