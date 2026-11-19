@@ -134,13 +134,18 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('submitBtn');
   const msg = document.getElementById('formMsg');
-  const formData = new FormData(e.target);
+  const nombre = e.target.elements.nombre.value;
+  const telefono = e.target.elements.telefono.value;
+  const email = e.target.elements.email.value;
   btn.disabled = true;
   btn.innerText = 'Enviando...';
   try {
     const res = await fetch('/api/contact', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ nombre, telefono, email })
     });
     if (res.ok) {
       msg.classList.remove('hidden');

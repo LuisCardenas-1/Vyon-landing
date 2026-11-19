@@ -1,6 +1,19 @@
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
+const getRawBody = (req) => {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      resolve(body);
+    });
+    req.on('error', reject);
+  });
+};
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -15,7 +28,25 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { nombre, telefono, email } = req.body;
+    let bodyData = {};
+
+    const contentType = req.headers['content-type'] || '';
+
+    if (contentType.includes('application/json')) {
+      const raw = await getRawBody(req);
+      bodyData = raw ? JSON.parse(raw) : {};
+    } else if (contentType.includes('application/x-www-form-urlencoded')) {
+      const raw = await getRawBody(req);
+      const params = new URLSearchParams(raw);
+      for (const [key, value] of params) {
+        bodyData[key] = value;
+      }
+    } else {
+      const raw = await getRawBody(req);
+      bodyData = raw ? JSON.parse(raw) : {};
+    }
+
+    const { nombre, telefono, email } = bodyData;
 
     if (!nombre || !telefono || !email) {
       return res.status(400).json({ error: 'Faltan campos requeridos' });
